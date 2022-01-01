@@ -10,6 +10,7 @@ import base64
 import easyocr
 import io
 import numpy
+import random
 from PIL import Image
 from PIL import ImageEnhance
 
