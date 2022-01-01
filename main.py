@@ -4,6 +4,7 @@ import os
 from json import loads as json_loads
 from os import path as os_path, getenv
 from sys import exit as sys_exit
+from sys import argv as sys_argv
 from getpass import getpass
 import re
 import base64
