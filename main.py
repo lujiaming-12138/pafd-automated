@@ -14,7 +14,7 @@ import numpy
 import random
 from PIL import Image
 from PIL import ImageEnhance
-
+import requests
 from requests import session, post, adapters
 adapters.DEFAULT_RETRIES = 5
 
