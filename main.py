@@ -16,6 +16,24 @@ from PIL import ImageEnhance
 from requests import session, post, adapters
 adapters.DEFAULT_RETRIES = 5
 
+def notify(_title, _message=None):
+    if not PUSH_KEY:
+        print("未配置PUSH_KEY！")
+        return
+
+    if not _message:
+        _message = _title
+
+    print(_title)
+    print(_message)
+
+    _response = requests.post(f"https://sc.ftqq.com/{PUSH_KEY}.send", {"text": _title, "desp": _message})
+
+    if _response.status_code == 200:
+        print(f"发送通知状态：{_response.content.decode('utf-8')}")
+    else:
+        print(f"发送通知失败：{_response.status_code}")
+
 class Fudan:
     """
     建立与复旦服务器的会话，执行登录/登出操作
@@ -105,6 +123,7 @@ class Fudan:
                   "\n***********************\n")
         else:
             print("◉登录失败，请检查账号信息")
+            notify("登录失败，请检查账号信息")
             self.close()
 
     def logout(self):
@@ -159,9 +178,11 @@ class Zlapp(Fudan):
         print("◉今日日期为:", today)
         if last_info["d"]["info"]["date"] == today:
             print("\n*******今日已提交*******")
+            notify("今日已提交")
             self.close()
         else:
             print("\n\n*******未提交*******")
+            notify("未提交")
             self.last_info = last_info["d"]["oldInfo"]
             
     def read_captcha(self, img_byte):
@@ -240,37 +261,13 @@ def get_account():
     """
     获取账号信息
     """
-    uid = getenv("STD_ID")
-    psw = getenv("PASSWORD")
-    if uid != None and psw != None:
-        print("从环境变量中获取了用户名和密码！")
-        return uid, psw
-    print("\n\n请仔细阅读以下日志！！\n请仔细阅读以下日志！！！！\n请仔细阅读以下日志！！！！！！\n\n")
-    if os_path.exists("account.txt"):
-        print("读取账号中……")
-        with open("account.txt", "r") as old:
-            raw = old.readlines()
-        if (raw[0][:3] != "uid") or (len(raw[0]) < 10):
-            print("account.txt 内容无效, 请手动修改内容")
-            sys_exit()
-        uid = (raw[0].split(":"))[1].strip()
-        psw = (raw[1].split(":"))[1].strip()
-
-    else:
-        print("未找到account.txt, 判断为首次运行, 请接下来依次输入学号密码")
-        uid = input("学号：")
-        psw = getpass("密码：")
-        with open("account.txt", "w") as new:
-            tmp = "uid:" + uid + "\npsw:" + psw +\
-                "\n\n\n以上两行冒号后分别写上学号密码，不要加空格/换行，谢谢\n\n请注意文件安全，不要放在明显位置\n\n可以从dailyFudan.exe创建快捷方式到桌面"
-            new.write(tmp)
-        print("账号已保存在目录下account.txt，请注意文件安全，不要放在明显位置\n\n建议拉个快捷方式到桌面")
-
-    return uid, psw
+    uid, psw, PUSH_KEY = sys_argv[1].strip().split(' ')
+    return uid, psw, PUSH_KEY
 
 
 if __name__ == '__main__':
-    uid, psw = get_account()
+    time.sleep(random.randint(0,300))
+    uid, psw, PUSH_KEY  = get_account()
     # print(uid, psw)
     zlapp_login = 'https://uis.fudan.edu.cn/authserver/login?' \
                   'service=https://zlapp.fudan.edu.cn/site/ncov/fudanDaily'
